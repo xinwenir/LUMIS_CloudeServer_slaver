@@ -184,6 +184,46 @@ class slaver():
         self.dataReceiveThread.start()
         self.dataDecodeThread.start()
 
+        # 启动时间监控线程
+        self.time_monitor_thread = threading.Thread(target=self.monitor_time, args=(s,))
+        self.time_monitor_thread.start()
+
+    # 检测如果超过午夜24点，重启线程 dataReceiveThread 与 dataDecodeThread
+    def monitor_time(self, s):
+        import datetime
+        now = datetime.datetime.now()
+        midnight = now.replace(hour=24, minute=0, second=0, microsecond=0)
+        delta = (midnight - now).total_seconds()
+        time.sleep(delta)
+
+        # 停止当前线程
+        self.measureStatus.clear()
+        self.dataReceiveThread.join()
+        self.dataDecodeThread.join()
+
+        # 关闭当前h5文件
+        self.h5.close()
+
+        # 生成新的文件名
+        fileName = "tmpData{}.h5"
+        i = 0
+        name = fileName.format("")
+        while os.path.exists(os.path.join("./data", name)):
+            i += 1
+            name = fileName.format(i)
+        self._h5Path = os.path.join("./data", name)
+        self.h5 = h5Data(self._h5Path, "w", detectorType=self.detectorType)
+
+        # 重启线程
+        self.measureStatus.set()
+        self.dataReceiveThread = threading.Thread(target=loadDataFromSocket, args=(s, self.measureStatus, self.decodeTool))
+        self.dataDecodeThread = threading.Thread(target=dataDecode, args=(self.h5, self.decodeTool))
+        self.dataReceiveThread.start()
+        self.dataDecodeThread.start()
+
+        # 继续监控时间
+        self.monitor_time(s)
+
     #结束测量
     def stopMeasure(self):
         self.measureStatus.clear()
@@ -191,6 +231,7 @@ class slaver():
             print("waiting for data receive thread stop.")
             self.dataReceiveThread.join()
             self.dataDecodeThread.join()
+
             print("data receive thread has stopped!")
         else:
             print("data receive thread didn't run.")
