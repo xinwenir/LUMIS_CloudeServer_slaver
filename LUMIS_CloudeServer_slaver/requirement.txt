@@ -1,0 +1,9 @@
+numpy==1.22.4
+pandas==1.2.4
+h5py==3.1.0
+prompt_toolkit==3.0.16
+terminaltables==3.1.0
+PyQt5==5.12.3
+plotext==4.2.0
+keyboard==0.13.5
+pyqtgraph==0.11.1
