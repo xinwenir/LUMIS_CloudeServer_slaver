@@ -168,6 +168,7 @@ class slaver():
             self._h5Path = os.path.join("./data", name)
         else:
             self._h5Path = self.h5Path
+        print("h5文件名:", self._h5Path)
         self.h5 = h5Data(self._h5Path, "w",detectorType=self.detectorType)
 
         # 与LUMIS@core建立TCP连接
@@ -193,6 +194,7 @@ class slaver():
         import datetime
         now = datetime.datetime.now()
         midnight = now.replace(hour=24, minute=0, second=0, microsecond=0)
+        print("midnight:", midnight)
         delta = (midnight - now).total_seconds()
         time.sleep(delta)
 
@@ -200,9 +202,10 @@ class slaver():
         self.measureStatus.clear()
         self.dataReceiveThread.join()
         self.dataDecodeThread.join()
-
+        print("停止当前线程")
         # 关闭当前h5文件
         self.h5.close()
+
 
         # 生成新的文件名
         fileName = "tmpData{}.h5"
@@ -212,6 +215,7 @@ class slaver():
             i += 1
             name = fileName.format(i)
         self._h5Path = os.path.join("./data", name)
+        print("新的文件名：", self._h5Path)
         self.h5 = h5Data(self._h5Path, "w", detectorType=self.detectorType)
 
         # 重启线程
@@ -220,7 +224,7 @@ class slaver():
         self.dataDecodeThread = threading.Thread(target=dataDecode, args=(self.h5, self.decodeTool))
         self.dataReceiveThread.start()
         self.dataDecodeThread.start()
-
+        print("线程重启")
         # 继续监控时间
         self.monitor_time(s)
 
@@ -231,7 +235,7 @@ class slaver():
             print("waiting for data receive thread stop.")
             self.dataReceiveThread.join()
             self.dataDecodeThread.join()
-
+            self.time_monitor_thread.join()
             print("data receive thread has stopped!")
         else:
             print("data receive thread didn't run.")
