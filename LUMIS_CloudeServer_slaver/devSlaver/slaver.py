@@ -193,15 +193,21 @@ class slaver():
     def monitor_time(self, s):
         import datetime
         now = datetime.datetime.now()
-        midnight = now.replace(hour=24, minute=0, second=0, microsecond=0)
+        #midnight = (now + datetime.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+        midnight = now.replace(hour=7, minute=40, second=0, microsecond=0)
+        if now > midnight:
+            midnight += datetime.timedelta(days=1)
         print("midnight:", midnight)
         delta = (midnight - now).total_seconds()
+        print("剩余时间:", delta)
         time.sleep(delta)
-
+        print("时间到准备停止当前线程")
         # 停止当前线程
         self.measureStatus.clear()
         self.dataReceiveThread.join()
+        print("step1")
         self.dataDecodeThread.join()
+        print("step2")
         print("停止当前线程")
         # 关闭当前h5文件
         self.h5.close()
