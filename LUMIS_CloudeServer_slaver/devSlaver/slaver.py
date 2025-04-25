@@ -218,7 +218,62 @@ class slaver():
         # 关闭当前h5文件
         self.h5.close()
 
+        #对于井眼型设备需要发送“主板给从板上电”指令
+        if self.detectorType == 1:
+            print("sending order to LUMIS@core:\033[32m power on the slave board \033[0m")
+            reply,message = linkGBT.sendCommand(devSlaver.turnOnPower)
+            if not reply:
+                print(message)
+                return 0, message
+            print("")
 
+        #发送时钟同步指令
+        print("sending order to LUMIS@core:\033[32m clock synchronization\033[0m")
+        reply, message = linkGBT.sendCommand(devSlaver.clockSynch)
+        if not reply:
+            print(message)
+            return 0, message
+        print("")
+
+        # 发送时钟同步指令后需等待一段事件才能发送复位指令
+        waitingTime = 15
+        for i in range(waitingTime):
+            print("\rwaiting for clock synchronization:[\033[32m{}\033[33m{}\033[0m] {}s/{}s".format(
+                "#"*i,"="*(waitingTime-i),i,waitingTime)
+                  ,end="")
+            time.sleep(1)
+        print("")
+
+        # 发送复位指令
+        print("sending order to LUMIS@core:\033[32m reset elink\033[0m")
+        reply, message = linkGBT.sendCommand(devSlaver.reset)
+        if not reply:
+            print(message)
+            return 1, message
+        time.sleep(0.1)
+
+        # 发送复位spiroc指令
+        print("sending order to LUMIS@core:\033[32m reset spiroc\033[0m")
+        reply, message = linkGBT.sendConfigFile("./dependence/reset_spiroc.dat")
+        if not reply:
+            print(message)
+            return 2, message
+
+        # 发送复位spiroc指令后需等待一段事件才能发送配置指令
+        for i in range(waitingTime):
+            print("\rwait for reset spiroc:[\033[32m{}\033[33m{}\033[0m] {}s/{}s".format(
+                "#"*i,"="*(waitingTime-i),i,waitingTime)
+                , end="")
+            time.sleep(1)
+        print("")
+
+        #发送配置指令
+        print("sending configuration to LUMIS@core:\033[32m {}\033[0m".format(self.configurePath))
+        reply, message = linkGBT.sendConfigFile(self.configurePath)
+        if not reply:
+            print(message)
+            return 3, message
+        
         # 生成新的文件名
         fileName = "tmpData{}.h5"
         i = 0
