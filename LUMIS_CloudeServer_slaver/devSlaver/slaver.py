@@ -202,8 +202,14 @@ class slaver():
         print("剩余时间:", delta)
         time.sleep(delta)
         print("时间到准备停止当前线程")
-        # 停止当前线程
+
+        # 清除测量状态
         self.measureStatus.clear()
+        # 断开 socket 连接
+        s.send(b'\xff\x01')
+        time.sleep(0.1)
+        s.close()
+        # 停止当前线程
         self.dataReceiveThread.join()
         print("step1")
         self.dataDecodeThread.join()
@@ -224,10 +230,18 @@ class slaver():
         print("新的文件名：", self._h5Path)
         self.h5 = h5Data(self._h5Path, "w", detectorType=self.detectorType)
 
+        # 重新与LUMIS@core建立TCP连接
+        s = socket.socket()
+        try:
+            s.connect((_devIP, _TCPport))
+        except Exception as e:
+            print("dataReceive error:", e.__str__())
+            return 4, e.__str__()
+        
         # 重启线程
         self.measureStatus.set()
         self.dataReceiveThread = threading.Thread(target=loadDataFromSocket, args=(s, self.measureStatus, self.decodeTool))
-        self.dataDecodeThread = threading.Thread(target=dataDecode, args=(self.h5, self.decodeTool))
+        self.dataDecodeThread = threading.Thread(target=dataDecode, args=(self.measureStatus, self.h5, self.decodeTool))
         self.dataReceiveThread.start()
         self.dataDecodeThread.start()
         print("线程重启")

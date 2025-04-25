@@ -68,7 +68,7 @@ class test:
         '''
         h5.startTime()
         t = time.time()
-        while tag.is_set():
+        while True:
             time.sleep(5)
             
         # 开始解码数据
@@ -162,7 +162,7 @@ class test:
         import datetime
         now = datetime.datetime.now()
         #midnight = (now + datetime.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
-        midnight = now.replace(hour=10, minute=5, second=0, microsecond=0)
+        midnight = now.replace(hour=10, minute=9, second=0, microsecond=0)
         if now > midnight:
             midnight += datetime.timedelta(days=1)
         print("midnight:", midnight)
