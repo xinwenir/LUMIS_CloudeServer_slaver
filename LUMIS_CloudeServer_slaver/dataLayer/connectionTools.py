@@ -790,7 +790,7 @@ def loadDataFromSocket(_s: socket.socket, tag: Event, decodeTool: Lumis_Decode):
         print('loadDataFromSocket:', 'end')
 
 #数据解码线程
-def dataDecode(h5: h5Data, decodeTool: Lumis_Decode):
+def dataDecode(tag: Event, h5: h5Data, decodeTool: Lumis_Decode):
     '''
     a thread function to decode binary data.
     负责解码数据，将数据写入h5文件，开始时将写入设备配置状态。
@@ -819,7 +819,7 @@ def dataDecode(h5: h5Data, decodeTool: Lumis_Decode):
         else:
             eventID = 0
         h5.putDeviceStatus(decodeTool.devStatus())
-        while True:
+        while tag.is_set():
             if decodeTool.getDetectorType() == 1:
                 event, timeTag, posture = decodeTool.decodingOneEventData()
             else:

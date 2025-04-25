@@ -181,7 +181,7 @@ class slaver():
 
         #开始测量-两个线程
         self.dataReceiveThread = threading.Thread(target=loadDataFromSocket,args=(s,self.measureStatus,self.decodeTool))
-        self.dataDecodeThread = threading.Thread(target=dataDecode,args=(self.h5,self.decodeTool))
+        self.dataDecodeThread = threading.Thread(target=dataDecode,args=(self.measureStatus, self.h5,self.decodeTool))
         self.dataReceiveThread.start()
         self.dataDecodeThread.start()
 

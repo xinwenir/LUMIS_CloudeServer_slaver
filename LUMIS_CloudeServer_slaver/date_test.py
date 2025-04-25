@@ -162,7 +162,7 @@ class test:
         import datetime
         now = datetime.datetime.now()
         #midnight = (now + datetime.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
-        midnight = now.replace(hour=7, minute=40, second=0, microsecond=0)
+        midnight = now.replace(hour=10, minute=5, second=0, microsecond=0)
         if now > midnight:
             midnight += datetime.timedelta(days=1)
         print("midnight:", midnight)
