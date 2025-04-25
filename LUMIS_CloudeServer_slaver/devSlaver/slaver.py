@@ -296,6 +296,7 @@ class slaver():
         # 重启线程
         self.measureStatus.set()
         self.dataReceiveThread = threading.Thread(target=loadDataFromSocket, args=(s, self.measureStatus, self.decodeTool))
+        time.sleep(1)
         self.dataDecodeThread = threading.Thread(target=dataDecode, args=(self.measureStatus, self.h5, self.decodeTool))
         self.dataReceiveThread.start()
         self.dataDecodeThread.start()
